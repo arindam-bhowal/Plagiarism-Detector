@@ -33,7 +33,7 @@
       {% endfor %} {% endif %}
     </div>
 
-    {% if assameseData|length > 0 %}
+    {% if multilingualData|length > 0 %}
     <div
       class="
         container
@@ -44,8 +44,8 @@
         justify-content-center
       "
     >
-      <h3>Assamese text</h3>
-      <p class="fw-bold">{{assameseData}}</p>
+      <h3>Native text</h3>
+      <p class="fw-bold">{{multilingualData}}</p>
     </div>
 
     {% endif %}
@@ -72,9 +72,9 @@
       <h5 class="my-1">Document view</h5>
       <p style="font-weight: bold; line-height: 1.6">
         {% for sentence, src in res.items() %} {% if src == "" %}
-        <span style="color: rgb(0, 255, 0)"> {{ sentence }}. </span>
+        <span style="color: rgb(0, 255, 0)"> {{ sentence }} </span>
         {% else %}
-        <span style="color: rgb(255, 0, 0)"> {{ sentence }}. </span>
+        <span style="color: rgb(255, 0, 0)"> {{ sentence }} </span>
         {% endif %} {% endfor %}
       </p>
       <div>

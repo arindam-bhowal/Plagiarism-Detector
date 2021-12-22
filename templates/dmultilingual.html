@@ -29,9 +29,9 @@
           <nav class="pt-0">
             <h1 class="brand"><a href="/" style="text-decoration: none; color: rgb(9, 31, 102);"><span id="blink">No</span>_Nokol</a></h1> 
             <ul>
+                <li><a class="link-styles" href="/"><span style="font-weight: 800;">English</span> Plag-Check</a></li>
               <li><a class="link-styles" href="/multilingual"><span style="font-weight: 800;">Translated-Multilingual</span> PLag-Check</a></li>
               <li><a class="link-styles" href="/intelligent"><span style="font-weight: 800;">Intelligent</span> Plag-Check</a></li>
-              <li><a class="link-styles" href="/dmultilingual"><span style="font-weight: 800;">Direct-Multilingual</span> Plag-Check</a></li>
             </ul>
           </nav>
         </div>
@@ -46,8 +46,39 @@
           <div class="row">
             <div class="col">
               <div class="mb-3 mt-3">
-                <h2 class="mb-3" style="font-weight: 300">English</h2>
-                <form action="/" method="POST" enctype="multipart/form-data">
+                <h2 class="mb-3" style="font-weight: 300">Direct Multilingual</h2>
+                <form action="/dmultilingual" method="POST" enctype="multipart/form-data">
+                  <!-- Select language start-->
+                  <label for="language"></label>
+                  <select class="btn btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" name="delimiter" aria-label=".form-select-sm example" id="language">
+                    <option selected value="." class="dropdown-menu">Select language</option>
+                    <option value="." class="dropdown-item">Arabic</option>
+                    <option value="।" class="dropdown-item">Assamese</option>
+                    <option value="।" class="dropdown-item">Bangla</option>
+                    <option value="。" class="dropdown-item">Chinese(literary)</option>
+                    <option value="." class="dropdown-item">Filipino</option>
+                    <option value="." class="dropdown-item">French</option>
+                    <option value="." class="dropdown-item">German</option>
+                    <option value="." class="dropdown-item">Gujarati</option>
+                    <option value="।" class="dropdown-item">Hindi</option>
+                    <option value="." class="dropdown-item">Indonesian</option>
+                    <option value="." class="dropdown-item">Italian</option>
+                    <option value="。" class="dropdown-item">Japanese</option>
+                    <option value="." class="dropdown-item">Kannada</option>
+                    <option value="." class="dropdown-item">Korean</option>
+                    <option value="." class="dropdown-item">Malayalam</option>
+                    <option value="." class="dropdown-item">Marathi</option>
+                    <option value="။" class="dropdown-item">Myanmar</option>
+                    <option value="।" class="dropdown-item">Nepali</option>
+                    <option value="|" class="dropdown-item">Odia</option>
+                    <option value="." class="dropdown-item">Punjabi</option>
+                    <option value="." class="dropdown-item">Russian</option>
+                    <option value="." class="dropdown-item">Spanish</option>
+                    <option value="." class="dropdown-item">Tamil</option>
+                    <option value="." class="dropdown-item">Telugu</option>
+                    <option value="۔" class="dropdown-item">Urdu</option>
+                  </select><br/><br>
+                  <!-- Select language end-->
                   <div class="form-group">
                     <label class="form-label custom-file-label" for="formFileLg >Select file</label>
                     <div class="custom-file">
@@ -97,10 +128,13 @@
             </div>
           </div>
         </div>
-        <div class="alert alert-warning d-none mb-3 mt-3" id="alert-modal"><span style="font-weight: bolder; color:red">WARNING!</span> File size greater than 20mb not allowed.</div>
+        <d class="d-flex justify-content-center mt-3">
+          <div class="alert alert-warning d-none mb-3 mt-3" id="alert-modal"><span style="font-weight: bolder; color:red">WARNING!</span> File size greater than 20mb not allowed.</div>
 
-        <div class="alert alert-success d-none mb-3 mt-5" id="alert-modal-ext"><span style="font-weight: bolder; color:seagreen">INFO!</span> File extension allowed are: .DOC |.TXT |.PDF |.ODT</div>
-
+          <div class="alert alert-success d-none mb-3 mt-5" id="alert-modal-ext"><span style="font-weight: bolder; color:seagreen">INFO!</span> File extension allowed are: .DOC |.TXT |.PDF |.ODT</div>
+  
+        </d>
+       
       <!--Waves Container-->
       <div class="waves">
         <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -121,9 +155,38 @@
      <!--Header ends-->
       <div class="container my-5 d-flex flex-column" id="non-assamese">
         <div class="alert alert-info" role="alert" style="text-align: center;">
-          How it works: English plagiarism checker breaks the document into sentences and looks for matches of those sentences on the web.
+          How it works: Direct multilingual plagiarism checker breaks the document into sentences and looks for matches of those sentences on the web.
         </div>
-        <form action="/textdata" method="POST">
+        <form action="/dmultilingualtext" method="POST">
+          <label for="language">Select a language</label>
+                  <select class="form-select form-select-sm my-3" name="delimiter" aria-label=".form-select-sm example" id="language">
+                    <option selected value=".">Open this select menu</option>
+                    <option value=".">Arabic</option>
+                    <option value="।">Assamese</option>
+                    <option value="।">Bangla</option>
+                    <option value="。">Chinese(literary)</option>
+                    <option value=".">Filipino</option>
+                    <option value=".">French</option>
+                    <option value=".">German</option>
+                    <option value=".">Gujarati</option>
+                    <option value="।">Hindi</option>
+                    <option value=".">Indonesian</option>
+                    <option value=".">Italian</option>
+                    <option value="。">Japanese</option>
+                    <option value=".">Kannada</option>
+                    <option value=".">Korean</option>
+                    <option value=".">Malayalam</option>
+                    <option value=".">Marathi</option>
+                    <option value="။">Myanmar</option>
+                    <option value="।">Nepali</option>
+                    <option value="|">Odia</option>
+                    <option value=".">Punjabi</option>
+                    <option value=".">Russian</option>
+                    <option value=".">Spanish</option>
+                    <option value=".">Tamil</option>
+                    <option value=".">Telugu</option>
+                    <option value="۔">Urdu</option>
+                  </select>
           <input class="form-control form-control-sm" type="text" placeholder="Source filter URL (optional)" name="sourceFilter">
           <textarea
           id='output'
@@ -134,25 +197,7 @@
             placeholder="Enter the text"
           ></textarea>
           <button type="submit" class="btn btn-outline-primary" id="buttonBootstrap" style="margin-top: 10px;" onClick="showSpinner()">Submit</button>
-          <svg
-            style="margin-top: 10px;"
-            xmlns="http://www.w3.org/2000/svg"
-            id="mic"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-mic"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"
-            />
-            <path
-              d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"
-            />
-          </svg>
-          <button id="stop"  style="margin-top: 10px;" class="btn btn-danger d-none">Stop</button>
-          <p id="ins" style="margin-left: 70px;">Press the mic</p>
+         
         </form>
       </div>
 

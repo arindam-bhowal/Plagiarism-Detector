@@ -1,5 +1,6 @@
 #Importing required libs
 import re
+import gc
 #Tika is used to import text data from pdf,docx,txt files
 from tika import parser
 import tika
@@ -11,9 +12,11 @@ load_dotenv()
 API_KEY=os.getenv("API_KEY")
 LOCATION=os.getenv("LOCATION")
 
-#function to translate assamese into english (Microsoft Translation API)
+from nltk.tokenize import sent_tokenize
+
+#function to translate input language into english (Microsoft Translation API)
 import requests, uuid, json
-def translate(text):
+def translate(text,language):
     # Add your subscription key and endpoint
     subscription_key = API_KEY
     endpoint = "https://api.cognitive.microsofttranslator.com"
@@ -24,7 +27,7 @@ def translate(text):
     constructed_url = endpoint + path
     params = {
         'api-version': '3.0',
-        'from': 'as',
+        'from': language,
         'to': ['en']
     }
     constructed_url = endpoint + path
@@ -40,48 +43,81 @@ def translate(text):
     }]
     request = requests.post(constructed_url, params=params, headers=headers, json=body)
     response = request.json()
+    gc.collect()
     return response[0]['translations'][0]['text']
+def extractData(path):
+    raw = parser.from_file(path)
+    data=raw['content']
+    return data
+
+def cleanData(data):
+    #remove extra space
+    data = " ".join(data.split())
+     #remove links
+    data = re.sub(r'http\S+', '', data)
+    #remove quoted text
+    data = re.sub(r'"[\w\s]+"', '', data)
+    #remove names/
+    prefixes = ['Mr', 'Mrs', 'Shri', 'Sri', 'Dr', 'Phd']
+    data = re.sub(r'\b(?:'+'|'.join(prefixes)+ ')\.\s*\S+', '', data)
+    return data
 
 #function to extract the english text data from files and return it
 def extractText(path):
     #extract
-    raw = parser.from_file(path)
-    data=raw['content']
-    #remove extra space
-    data = " ".join(data.split())
-    #remove links
-    data = re.sub(r'http\S+', '', data)
+    data=extractData(path)
+    #clean
+    data = cleanData(data)
     #break into sentences
-    data=data.split('. ') 
+    data=sent_tokenize(data)
+    # data=data.split('. ') 
     #return array of sentences
     return data
-#function to extract the assamese text data from files and return it
-def extractAssameseText(path):
-    raw = parser.from_file(path)
-    data=raw['content']
-    data = " ".join(data.split())
-    data = re.sub(r'http\S+', '', data)
+#Extract and tokenize assamese text
+def extractDMultilingualText(path,delimiter):
+    #extract
+    data=extractData(path)
+    #clean
+    data = cleanData(data)
+    #break into sentences
+    data=data.split(f'{delimiter} ')
+    # data=data.split('. ') 
+    #return array of sentences
+    return data
+
+#function to extract the multilingual text data from files and return it
+def extractMultilingualText(path,language):
+    data=extractData(path)
+    data = cleanData(data)
     #since MS API support translation upto 5000 characters only
     if len(data)>=5000:
         raise "text limit exceeded"
-    translatedData=translate(data)
-    translatedData=translatedData.split('. ')
+    translatedData=translate(data,language)
+    translatedData=sent_tokenize(translatedData)
+    # translatedData=translatedData.split('. ')
     return translatedData,data
-#function to extract the assamese text data from text area input and return it
-def inputAssameseDataExtract(data):
-    data = " ".join(data.split())
-    data = re.sub(r'http\S+', '', data)
+#function to extract the multilingual text data from text area input and return it
+def inputMultilingualDataExtract(data,language):
+    data = cleanData(data)
     if len(data)>=5000:
         raise "text limit exceeded"
-    translatedData=translate(data)
-    translatedData=translatedData.split('. ')
+    translatedData=translate(data,language)
+    translatedData=sent_tokenize(translatedData)
+    # translatedData=translatedData.split('. ')
     return translatedData,data
 #function to extract the english text data from text area input and return it
-def inputDataExtract(textData):
-    textData=" ".join(textData.split())
-    textData = re.sub(r'http\S+', '', textData)
-    textData=textData.split('. ') 
-    return textData
+def inputDataExtract(data):
+    data = cleanData(data)
+    data=sent_tokenize(data)
+    # textData=textData.split('. ') 
+    return data
+def DMultilingualInputDataExtract(data,delimiter):
+    data = cleanData(data)
+    # data=sent_tokenize(data)
+    data=data.split(f'{delimiter} ') 
+    # print(data)
+    return data
+
 #file validation function
 def allowed_file(filename):
 
@@ -103,15 +139,18 @@ def allowed_file(filename):
 
 # Scrapper
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 #function that return a link if exact match of the query is found
-def findPlag(text,sourceFilter=""):
+def findPlag(text,session,sourceFilter=""):
     #text = text.replace(" ","+")
     # print(text)
     url = f'https://www.bing.com/search?q=%2B"{text}"&qs=n&form=QBRE&sp=-1&pq=%2B"{text.lower()}"'
     # Crafting the proper request 
     header = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'}
-    page = requests.get(url, headers= header, allow_redirects=True)
+    with session.get(url,headers= header, allow_redirects=True) as response:
+        page = response
     content = BeautifulSoup(page.content, 'html.parser')
+    gc.collect()
     #print(content.prettify())
     #return content
     # link= content.find('h2')
@@ -124,14 +163,17 @@ def findPlag(text,sourceFilter=""):
             return link
     except:
         return ""
+        
 #function that return a link for relevant match of the query is found
-def findPlagNormal(text,sourceFilter=""):
+def findPlagNormal(text,session,sourceFilter=""):
     #text = text.replace(" ","+")
     # print(text)
     url = f'https://www.bing.com/search?q="{text}"&qs=n&form=QBRE&sp=-1&pq="{text.lower()}"' 
     header = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'}
-    page = requests.get(url, headers= header, allow_redirects=True)
+    with session.get(url,headers= header, allow_redirects=True) as response:
+        page = response
     content = BeautifulSoup(page.content, 'html.parser')
+    gc.collect()
     #print(content.prettify())
     #return content
     # link= content.find('h2')
@@ -152,36 +194,34 @@ from collections import defaultdict,Counter
 def checkPlag(data,sourceFilter=""):
     res={}
     websites=defaultdict(int)
-    plagCount=0
-    total=0
-    for sentence in data:
-        link=findPlag(sentence,sourceFilter)
-        res[sentence]=link
-        total+=1
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        with requests.Session() as session:
+            results = list(executor.map(findPlag, data,[session] * len(data),[sourceFilter] * len(data)))
+    for link in results:
         if link!='':
             websites[link]+=1
-        if res[sentence]!='':
-            plagCount+=1
     k = Counter(websites)
     mostProbable = k.most_common(3)
+    plagCount = len(results)-results.count("")
+    total=len(data)
+    res=dict(zip(data,results))
     return res,plagCount,total,mostProbable
 #function that takes array of sentences as input and returns associated links, plagiarism count
 #total sentences, mostProbable sentences using relevant match function
 def checkPlagNormal(data,sourceFilter=""):
     res={}
     websites=defaultdict(int)
-    plagCount=0
-    total=0
-    for sentence in data:
-        link=findPlagNormal(sentence,sourceFilter)
-        res[sentence]=link
-        total+=1
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        with requests.Session() as session:
+            results = list(executor.map(findPlagNormal, data,[session] * len(data),[sourceFilter] * len(data)))
+    for link in results:
         if link!='':
             websites[link]+=1
-        if res[sentence]!='':
-            plagCount+=1
     k = Counter(websites)
     mostProbable = k.most_common(3)
+    plagCount = len(results)-results.count("")
+    total=len(data)
+    res=dict(zip(data,results))
     return res,plagCount,total,mostProbable
 #Intelligent Plagiarism checker
 import nltk
@@ -248,18 +288,20 @@ def transformToSynonyms(data):
 
 def checkPlagIntelligent(data,sourceFilter=""):
     res={}
+    transformedData = list(map(transformSentence, data))
     websites=defaultdict(int)
-    plagCount=0
-    total=0
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        with requests.Session() as session:
+            results = list(executor.map(findPlagNormal, transformedData,[session] * len(transformedData),[sourceFilter] * len(transformedData)))
+    i=0
     for sentence in data:
-        tranformedText=transformSentence(sentence)
-        link=findPlagNormal(tranformedText,sourceFilter)
-        res[sentence]=[tranformedText,link]
-        total+=1
+        res[sentence]=[transformedData[i],results[i]]
+        i+=1
+    for link in results:
         if link!='':
             websites[link]+=1
-        if res[sentence][1]!='':
-            plagCount+=1
     k = Counter(websites)
     mostProbable = k.most_common(3)
+    plagCount = len(results)-results.count("")
+    total=len(data)
     return res,plagCount,total,mostProbable
